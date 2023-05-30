@@ -1,6 +1,8 @@
 ﻿using Checkout.Domain;
 using checkout.Domain.Shipping;
+using Checkout.Exceptions;
 using Checkout.Infrastructure.Persistence;
+using FluentValidation.Results;
 using MediatR;
 
 namespace Checkout.Features.Orders.Commands;
@@ -22,20 +24,34 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
     {
         _context = context;
     }
-
-
+    
     public async Task<Unit> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
         double orderTotal = 0;
         double shippingPrice = 0;
-        request.Items.ForEach(async item =>
+        foreach (var item in request.Items)
         {
             var product = await _context.Products.FindAsync(item.Product.ProductId);
+            if (product is null)
+            {
+                throw new ValidationException(new List<ValidationFailure>
+                {
+                    new("Error", $"Product with ID: {item.Product.ProductId} not found")
+                });
+            }
+
             item.Product = product;
             item.Total = (item.Product.Price * item.Quantity);
             orderTotal += item.Total;
-        });
+        }
         ShippingDestination? destination = ShippingDestination.GetDestinationInfo(request.ZoneId);
+        if (destination is null)
+        {
+            throw new ValidationException(new List<ValidationFailure>
+            {
+                new("Error", $"Destination Zone with ID: {request.ZoneId} not found")
+            });
+        }
         destination?.CalcShippingPrice(orderTotal, ref shippingPrice);
         var newOrder = new Order
         {
@@ -48,7 +64,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
 
         _context.Orders.Add(newOrder);
 
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
     }

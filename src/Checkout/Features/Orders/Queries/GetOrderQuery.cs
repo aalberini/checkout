@@ -1,4 +1,5 @@
 ﻿using Checkout.Domain;
+using Checkout.Exceptions;
 using Checkout.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +20,7 @@ public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, GetOrderQuery
     {
         _context = context;
     }
-    public async Task<GetOrderQueryResponse> Handle(GetOrderQuery request, CancellationToken cancellationToken)
+    public Task<GetOrderQueryResponse> Handle(GetOrderQuery request, CancellationToken cancellationToken)
     {
         var order = _context.Orders
             .Where(order => order.OrderId == request.OrderId)
@@ -29,7 +30,7 @@ public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, GetOrderQuery
 
         if (order != null)
         {
-            return new GetOrderQueryResponse
+            return Task.FromResult(new GetOrderQueryResponse
             {
                 OrderId = order.OrderId,
                 ClientId = order.ClientId,
@@ -37,9 +38,9 @@ public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, GetOrderQuery
                 ShippingPrice = order.ShippingPrice,
                 Taxes = order.Taxes,
                 Items = order.Items
-            };
+            });
         }
-        return null;
+        throw new NotFoundException(nameof(Order), request.OrderId);
     }
 }
 
