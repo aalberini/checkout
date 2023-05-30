@@ -1,0 +1,7 @@
+/src/.idea
+obj
+.idea
+bin
+/src/Checkout/mydb.db-wal
+/src/Checkout/mydb.db
+/src/Checkout/mydb.db-shm
