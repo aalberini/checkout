@@ -1,6 +1,6 @@
 ﻿using Checkout.Domain;
 using checkout.Domain.Shipping;
-using Checkout.Infrastucture.Persistence;
+using Checkout.Infrastructure.Persistence;
 using MediatR;
 
 namespace Checkout.Features.Orders.Commands;

@@ -1,6 +1,6 @@
 using System.Reflection;
 using Checkout.Domain;
-using Checkout.Infrastucture.Persistence;
+using Checkout.Infrastructure.Persistence;
 using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);

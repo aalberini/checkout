@@ -1,5 +1,5 @@
 ﻿using Checkout.Domain;
-using Checkout.Infrastucture.Persistence;
+using Checkout.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

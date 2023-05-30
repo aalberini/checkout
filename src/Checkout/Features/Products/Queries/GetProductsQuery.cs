@@ -1,4 +1,4 @@
-﻿using Checkout.Infrastucture.Persistence;
+﻿using Checkout.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,7 +1,7 @@
 ﻿using Checkout.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Checkout.Infrastucture.Persistence;
+namespace Checkout.Infrastructure.Persistence;
 public class CheckoutDbContext : DbContext
 {
     public CheckoutDbContext(DbContextOptions<CheckoutDbContext> options) : base(options)
