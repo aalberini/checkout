@@ -28,12 +28,12 @@ public class ProductsController : ControllerBase
     /// </summary>
     /// <param name="command"></param>
     /// <returns></returns>
-    [HttpPost("create")]
+    [HttpPost]
     public async Task<IActionResult> CreateProduct([FromBody] CreateProductCommand command)
     {
-        await _mediator.Send(command);
+        var product = await _mediator.Send(command);
 
-        return Ok();
+        return Ok(product);
     }
 
     /// <summary>
@@ -42,6 +42,10 @@ public class ProductsController : ControllerBase
     /// <param name="query"></param>
     /// <returns></returns>
     [HttpGet("{ProductId}")]
-    public Task<GetProductQueryResponse> GetProductById([FromRoute] GetProductQuery query) =>
-        _mediator.Send(query);
+    public async Task<IActionResult> GetProductById([FromRoute] GetProductQuery query)
+    {
+        var product = await _mediator.Send(query);
+
+        return Ok(product);
+    }
 }

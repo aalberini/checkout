@@ -1,6 +1,6 @@
 ﻿namespace Checkout.Domain;
 
-public class OrderItem
+public class OrderItem : BaseEntity
 {
     public int OrderItemId { get; set; }
     public Product Product { get; set; } = null!;

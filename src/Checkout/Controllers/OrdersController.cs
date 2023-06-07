@@ -21,12 +21,12 @@ public class OrdersController : ControllerBase
     /// </summary>
     /// <param name="command"></param>
     /// <returns></returns>
-    [HttpPost("create")]
+    [HttpPost]
     public async Task<IActionResult> CreateOrder([FromBody] CreateOrderCommand command)
     {
-        await _mediator.Send(command);
+        var order = await _mediator.Send(command);
 
-        return Ok();
+        return Ok(order);
     }
 
     /// <summary>
@@ -37,4 +37,18 @@ public class OrdersController : ControllerBase
     [HttpGet("{OrderId}")]
     public Task<GetOrderQueryResponse> GetOrderById([FromRoute] GetOrderQuery query) =>
         _mediator.Send(query);
+
+    /// <summary>
+    /// Crea una orden nueva
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns></returns>
+    [HttpPut("{OrderId}")]
+    public async Task<IActionResult> UpdateOrder([FromBody] UpdateOrderCommand command, [FromRoute] int OrderId)
+    {
+        command.OrderId = OrderId;
+        var updatedOrder = await _mediator.Send(command);
+
+        return Ok(updatedOrder);
+    }
 }
