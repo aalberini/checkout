@@ -1,13 +1,14 @@
 ﻿using Checkout.Domain;
 using checkout.Domain.Shipping;
 using Checkout.Exceptions;
+using Checkout.Features.Orders.Queries;
 using Checkout.Infrastructure.Persistence;
 using FluentValidation.Results;
 using MediatR;
 
 namespace Checkout.Features.Orders.Commands;
 
-public class CreateOrderCommand : IRequest
+public class CreateOrderCommand : IRequest<GetOrderQueryResponse>
 {
     public int ClientId { get; set; } = default!;
     public int ZoneId { get; set; } = default!;
@@ -16,7 +17,7 @@ public class CreateOrderCommand : IRequest
 }
 
 
-public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
+public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, GetOrderQueryResponse>
 {
     private readonly CheckoutDbContext _context;
 
@@ -25,9 +26,18 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
         _context = context;
     }
     
-    public async Task<Unit> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    public async Task<GetOrderQueryResponse> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        double orderTotal = 0;
+        var destination = ShippingDestination.GetDestinationInfo(request.ZoneId);
+        if (destination is null)
+        {
+            throw new ValidationException(new List<ValidationFailure>
+            {
+                new("Error", $"Destination Zone with ID: {request.ZoneId} not found")
+            });
+        }
+
+        double productTotal = 0;
         double shippingPrice = 0;
         foreach (var item in request.Items)
         {
@@ -42,23 +52,16 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
 
             item.Product = product;
             item.Total = (item.Product.Price * item.Quantity);
-            orderTotal += item.Total;
+            productTotal += item.Total;
         }
-        ShippingDestination? destination = ShippingDestination.GetDestinationInfo(request.ZoneId);
-        if (destination is null)
-        {
-            throw new ValidationException(new List<ValidationFailure>
-            {
-                new("Error", $"Destination Zone with ID: {request.ZoneId} not found")
-            });
-        }
-        destination?.CalcShippingPrice(orderTotal, ref shippingPrice);
+        destination.CalcShippingPrice(productTotal, ref shippingPrice);
         var newOrder = new Order
         {
             ClientId = request.ClientId,
             ZoneId = request.ZoneId,
             ShippingPrice = shippingPrice,
             Taxes = request.Taxes,
+            Total = productTotal + shippingPrice + request.Taxes,
             Items = request.Items
         };
 
@@ -66,6 +69,15 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Unit.Value;
+        return await Task.FromResult(new GetOrderQueryResponse
+        (
+            newOrder.OrderId,
+            newOrder.ClientId,
+            newOrder.ZoneId,
+            newOrder.ShippingPrice,
+            newOrder.Taxes,
+            newOrder.Total,
+            newOrder.Items
+        ));
     }
 }

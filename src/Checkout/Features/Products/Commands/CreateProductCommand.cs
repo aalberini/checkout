@@ -1,17 +1,19 @@
 ﻿using Checkout.Domain;
+using Checkout.Features.Orders.Queries;
+using Checkout.Features.Products.Queries;
 using Checkout.Infrastructure.Persistence;
 using MediatR;
 
 namespace Checkout.Features.Products.Commands;
 
-public class CreateProductCommand : IRequest
+public class CreateProductCommand : IRequest<GetProductQueryResponse>
 {
     public string Description { get; set; } = default!;
     public double Price { get; set; }
 }
 
 
-public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand>
+public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, GetProductQueryResponse>
 {
     private readonly CheckoutDbContext _context;
 
@@ -21,7 +23,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand>
     }
 
 
-    public async Task<Unit> Handle(CreateProductCommand request, CancellationToken cancellationToken)
+    public async Task<GetProductQueryResponse> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
         var newProduct = new Product
         {
@@ -33,6 +35,11 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand>
 
         await _context.SaveChangesAsync();
 
-        return Unit.Value;
+        return await Task.FromResult(new GetProductQueryResponse
+        (
+            newProduct.ProductId,
+            newProduct.Description,
+            newProduct.Price
+        ));
     }
 }

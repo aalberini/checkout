@@ -1,4 +1,6 @@
-﻿using Checkout.Infrastructure.Persistence;
+﻿using Checkout.Domain;
+using Checkout.Exceptions;
+using Checkout.Infrastructure.Persistence;
 using MediatR;
 
 namespace Checkout.Features.Products.Queries;
@@ -19,19 +21,21 @@ public class GetProductQueryHandler : IRequestHandler<GetProductQuery, GetProduc
     public async Task<GetProductQueryResponse> Handle(GetProductQuery request, CancellationToken cancellationToken)
     {
         var product = await _context.Products.FindAsync(request.ProductId);
-
-        return new GetProductQueryResponse
+        if (product is not null)
         {
-            Description = product.Description,
-            ProductId = product.ProductId,
-            Price = product.Price
-        };
+            return new GetProductQueryResponse
+            (
+                product.ProductId,
+                product.Description,
+                product.Price
+            );
+        }
+        throw new NotFoundException(nameof(Product), request.ProductId);
     }
 }
 
-public class GetProductQueryResponse
-{
-    public int ProductId { get; set; }
-    public string Description { get; set; } = default!;
-    public double Price { get; set; }
-}
+public record GetProductQueryResponse(
+    int ProductId,
+    string Description,
+    double Price
+);

@@ -7,6 +7,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,13 @@ builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
-builder.Services.AddSqlite<CheckoutDbContext>(builder.Configuration.GetConnectionString("Default"));
+builder.Services.AddDbContextFactory<CheckoutDbContext>(opt =>
+    opt.UseSqlite(builder.Configuration.GetConnectionString("Default"))
+        .EnableSensitiveDataLogging());
+    
+    
+//    .AddSqlite<CheckoutDbContext>(
+//    builder.Configuration.GetConnectionString("Default"));
 
 var app = builder.Build();
 
