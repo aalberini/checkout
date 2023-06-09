@@ -11,3 +11,5 @@ dotnet ef database update
 
 ## To remove migrations, from command line:
 dotnet ef migrations remove
+
+Before to start, you must add some products to database using the endpoint provided.
