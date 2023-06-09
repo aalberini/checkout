@@ -22,18 +22,18 @@ public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, GetOrderQuery
     }
     public Task<GetOrderQueryResponse> Handle(GetOrderQuery request, CancellationToken cancellationToken)
     {
+        // With EF
         var order = _context.Orders
-            .Where(order => order.OrderId == request.OrderId)
-            .Include(order => order.Items)
-            .ThenInclude(item => item.Product)
-            .FirstOrDefault();
-        
+            //.Include(order => order.Items)
+            //.ThenInclude(item => item.Product)
+            .FirstOrDefault(order => order.OrderId == request.OrderId);
+
+        // With LinQ
         /*
-        var query = from o in _context.Set<Order>()
-            join o0 in _context.Set<OrderItem>()
-                on o.OrderId equals p.BlogId into grouping
-            select new { b, grouping };
-            */
+        var order = (from o in _context.Set<Order>()
+            where o.OrderId == request.OrderId
+            select o).FirstOrDefault();
+        */
 
         if (order != null)
         {

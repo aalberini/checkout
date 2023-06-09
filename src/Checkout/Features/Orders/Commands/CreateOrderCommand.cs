@@ -54,7 +54,9 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Get
             item.Total = (item.Product.Price * item.Quantity);
             productTotal += item.Total;
         }
-        destination.CalcShippingPrice(productTotal, ref shippingPrice);
+
+        ShippingDestination.CalcShippingPriceDelegate calculatorDelegate = destination.GetCalcShipping();
+        calculatorDelegate(productTotal, ref shippingPrice);
         var newOrder = new Order
         {
             ClientId = request.ClientId,

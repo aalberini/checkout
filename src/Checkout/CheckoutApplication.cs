@@ -42,34 +42,4 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
-await SeedProducts();
-
 app.Run();
-
-#region Add database records
-async Task SeedProducts()
-{
-    using var scope = app.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<CheckoutDbContext>();
-
-    if (!context.Products.Any())
-    {
-        context.Products.AddRange(new List<Product>
-        {
-            new Product
-            {
-                Description = "Product 01",
-                Price = 16000
-            },
-            new Product
-            {
-                Description = "Product 02",
-                Price = 52200
-            }
-        });
-
-        await context.SaveChangesAsync();
-    }
-}
-#endregion
-

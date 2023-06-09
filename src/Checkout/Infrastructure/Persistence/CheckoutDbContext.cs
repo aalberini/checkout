@@ -33,8 +33,7 @@ public class CheckoutDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Order>().HasKey(o => o.OrderId);
-        modelBuilder.Entity<OrderItem>().HasKey(oi => oi.OrderItemId);
-        modelBuilder.Entity<Product>().HasKey(p => p.ProductId);
+        modelBuilder.Entity<Order>().Navigation(order => order.Items).AutoInclude();
+        modelBuilder.Entity<OrderItem>().Navigation(item =>  item.Product).AutoInclude();
     }
 }
