@@ -2,8 +2,10 @@
 
 public abstract class ShippingDestination
 {
-    public virtual void CalcShippingPrice(double orderTotal, ref double shippingPrice) { }
-    
+    public delegate void CalcShippingPriceDelegate(double orderTotal, ref double shippingPrice);
+
+    public abstract CalcShippingPriceDelegate GetCalcShipping();
+
     public static ShippingDestination? GetDestinationInfo(int destination)
     {
         return destination switch

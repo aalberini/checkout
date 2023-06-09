@@ -92,7 +92,8 @@ public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand, Get
             });
         }
 
-        destination?.CalcShippingPrice(productTotal, ref shippingPrice);
+        ShippingDestination.CalcShippingPriceDelegate calculatorDelegate = destination.GetCalcShipping();
+        calculatorDelegate(productTotal, ref shippingPrice);
         order.ZoneId = request.ZoneId;
         order.ShippingPrice = shippingPrice;
         order.Taxes = request.Taxes;
