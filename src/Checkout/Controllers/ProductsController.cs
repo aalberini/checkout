@@ -1,10 +1,12 @@
 ﻿using Checkout.Features.Products.Commands;
 using Checkout.Features.Products.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Checkout.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/products")]
 public class ProductsController : ControllerBase
@@ -29,6 +31,7 @@ public class ProductsController : ControllerBase
     /// <param name="command"></param>
     /// <returns></returns>
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> CreateProduct([FromBody] CreateProductCommand command)
     {
         var product = await _mediator.Send(command);
