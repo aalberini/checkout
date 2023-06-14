@@ -1,8 +1,10 @@
 ﻿using Checkout.Domain;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Checkout.Infrastructure.Persistence;
-public class CheckoutDbContext : DbContext
+public class CheckoutDbContext : IdentityDbContext<IdentityUser>
 {
     public CheckoutDbContext(DbContextOptions<CheckoutDbContext> options) : base(options)
     {
@@ -35,5 +37,9 @@ public class CheckoutDbContext : DbContext
     {
         modelBuilder.Entity<Order>().Navigation(order => order.Items).AutoInclude();
         modelBuilder.Entity<OrderItem>().Navigation(item =>  item.Product).AutoInclude();
+
+        modelBuilder.Entity<IdentityUserLogin<string>>().HasNoKey();
+        modelBuilder.Entity<IdentityUserToken<string>>().HasNoKey();
+        modelBuilder.Entity<IdentityUserRole<string>>().HasKey(ur => new { ur.UserId, ur.RoleId });
     }
 }
